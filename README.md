@@ -2,4 +2,4 @@ classify.py - python code for using and creating a machine leanring model for cl
 
 server.py - Python server for transmitting data to and from localized Python scrpits.
 
-video-server.js - JS server for transmitting video feed between phone and headset.
+video_server.js - JS server for transmitting video feed between phone and headset.
