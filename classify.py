@@ -12,14 +12,17 @@ from sklearn.metrics import accuracy_score
 import skimage.measure;
 import pickle
 import time
+from sklearn.metrics import accuracy_score, confusion_matrix
 
 CLASSIFIER_FILENAME = 'v2_classifier.pkl'
+#CLASSIFIER_FILENAME = 'quality_classifier.pkl'
+#CLASSIFIER_FILENAME = 'RF_classifier.pkl'
 
-def calculate_hit_rate(test_folder_root, trained_classifier):
+'''def calculate_hit_rate(test_folder_root, trained_classifier):
     TEST_FOLDERS = {
         'lower_good_proccessed': 0,
         'middle_good_proccessed': 1,
-        'higher_good_proccessed': 2,
+        'upper_good_proccessed': 2,
         'left_bad_proccessed': 3,
         'right_bad_proccessed': 4,
     }
@@ -45,17 +48,22 @@ def calculate_hit_rate(test_folder_root, trained_classifier):
                 
                 # Use your existing classification function
                 img = plt.imread(image_path)
-                if img.ndim == 3:
-                    img = img[..., 0]
+                #if img.ndim == 3:
+                #   img = img[..., 0]
+
+                if img.ndim == 3 and img.shape[2] > 3:
+                    img = img[:, :, :3]
 
                 try:
-                    features = segment2feature(img)
+                    #features = segment2feature(img)
                     
-                    input_feature_vector = features.flatten().reshape(1, -1)
+                    #input_feature_vector = features.flatten().reshape(1, -1)
                     
-                    prediction = loaded_classifier.predict(input_feature_vector)
+                    #prediction = loaded_classifier.predict(input_feature_vector)
                     
-                    predicted_class = int(prediction[0])
+                    #predicted_class = int(prediction[0])
+
+                    predicted_class = classify_single_image(img)
                     
                 except Exception as e:
                     print(f"Error processing and classifying image: {e}")
@@ -75,7 +83,95 @@ def calculate_hit_rate(test_folder_root, trained_classifier):
     # Calculate the accuracy (hit rate)
     accuracy = accuracy_score(y_true, y_pred)
     
-    return accuracy 
+    return accuracy '''
+
+def calculate_hit_rate(test_folder_root, trained_classifier):
+    TEST_FOLDERS = {
+        'lower_good_proccessed': 0,
+        'middle_good_proccessed': 1,
+        'upper_good_proccessed': 2,
+        'left_bad_proccessed': 3,
+        'right_bad_proccessed': 4,
+    }
+    image_extensions = ('.png', '.jpg', '.jpeg')
+    y_true = []
+    y_pred = []
+    total_images = 0
+    
+    print(f"\n--- Starting Hit Rate Calculation on Test Data in '{test_folder_root}' ---")
+    
+    for folder_name, true_label in TEST_FOLDERS.items():
+        folder_path = os.path.join(test_folder_root, folder_name)
+        if not os.path.isdir(folder_path):
+            print(f"⚠️ Warning: Test folder '{folder_path}' not found. Skipping.")
+            continue
+            
+        print(f"Processing images in '{folder_name}' (True Label: {true_label})...")
+        
+        for filename in os.listdir(folder_path):
+            if filename.lower().endswith(image_extensions):
+                image_path = os.path.join(folder_path, filename)
+                total_images += 1
+                
+                img = plt.imread(image_path)
+                if img.ndim == 3 and img.shape[2] > 3:
+                    img = img[:, :, :3]
+
+                predicted_class = None
+                try:
+                    predicted_class = classify_single_image(img)
+                except Exception as e:
+                    print(f"Error processing and classifying image: {e}")
+                
+                if predicted_class is not None:
+                    y_true.append(true_label)
+                    y_pred.append(predicted_class)
+    
+    if total_images == 0 or len(y_true) == 0:
+        print("🚨 Error: No images successfully processed for testing.")
+        return 0.0
+
+    print(f"\nTotal images successfully processed for testing: {len(y_true)} out of {total_images}")
+    
+    # 1. Overall Accuracy
+    overall_accuracy = accuracy_score(y_true, y_pred)
+    
+    # 2. Calculate Per-Class Accuracy using a Confusion Matrix
+    # The diagonal elements of a confusion matrix represent correct predictions
+    cm = confusion_matrix(y_true, y_pred, labels=[0, 1, 2, 3, 4])
+    
+    class_accuracies = []
+    class_names = list(TEST_FOLDERS.keys())
+    
+    for i in range(len(TEST_FOLDERS)):
+        total_samples_in_class = cm[i].sum()
+        if total_samples_in_class > 0:
+            # Correctly predicted items divided by total items in that class
+            acc = cm[i, i] / total_samples_in_class
+        else:
+            acc = 0.0
+        class_accuracies.append(acc)
+    
+    # 3. Plotting the Graph
+    plt.figure(figsize=(10, 6))
+    bars = plt.bar(class_names, [a * 100 for a in class_accuracies], color=['#4C72B0', '#55A868', '#C44E52', '#8172B2', '#CCB974'])
+    
+    # Add value labels on top of each bar
+    for bar in bars:
+        yval = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2.0, yval + 1, f"{yval:.1f}%", ha='center', va='bottom', fontweight='bold')
+    
+    plt.title(f'Accuracy Breakdown per Class (Overall Hit Rate: {overall_accuracy*100:.2f}%)', fontsize=14, fontweight='bold')
+    plt.xlabel('Image Classes', fontsize=12)
+    plt.ylabel('Accuracy (%)', fontsize=12)
+    plt.ylim(0, 110) # Leave a little space at the top for the text labels
+    plt.xticks(rotation=15, ha='right')
+    plt.tight_layout()
+    
+    # This will pause execution and pop up the window showing your breakdown graph
+    plt.show()
+    
+    return overall_accuracy
 
 def segment(im, red_thresh=0.90, rel_factor=2.0, min_cluster_size=2000):
     imf = im.astype(np.float32)
@@ -159,8 +255,8 @@ def segment2feature(Si):
 
 def train_classifier(X_features, Y):
     # X_features is a list of feature vectors (1D arrays)
-    #classdata = make_pipeline(StandardScaler(), svm.SVC(gamma='auto', probability=True))
-    classdata = make_pipeline(StandardScaler(), tree.DecisionTreeClassifier(random_state = 42))
+    classdata = make_pipeline(StandardScaler(), svm.SVC(gamma='auto', probability=True))
+    #classdata = make_pipeline(StandardScaler(), tree.DecisionTreeClassifier(random_state = 42))
     classdata.fit(X_features, Y)
     return classdata
 
@@ -305,10 +401,10 @@ def classify_single_image(img):
         features = segment2feature(seg_img)
         
         input_feature_vector = features.flatten().reshape(1, -1)
-        
+
         prediction = loaded_classifier.predict(input_feature_vector)
-        
-        return str(prediction[0])
+
+        return int(prediction[0])
         
     except Exception as e:
         print(f"Error processing and classifying image: {e}")
@@ -336,7 +432,8 @@ if __name__ == "__main__":
     #setupClassifier()
 
     NEW_IMAGE_PATH = 'test.png'
-    TEST_DATA_ROOT = 'processed_data_folder'
+    TRAINING_DATA_ROOT = 'test_data_folder'
+    TEST_DATA_ROOT = 'Test_images_for_accuracy'
     # 1. Load the trained classifier
     try:
         loaded_classifier = load_classifier(CLASSIFIER_FILENAME)
