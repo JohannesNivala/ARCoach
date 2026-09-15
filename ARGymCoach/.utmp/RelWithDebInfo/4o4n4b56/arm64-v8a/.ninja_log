@@ -1,0 +1,12 @@
+# ninja log v5
+122	919	7817018028257744	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	5ef572d29f0718b3
+921	1231	7817018031456408	C:/Users/noren/OneDrive/Dokument/LTH/AR/AR project/Unity-PassthroughCameraApiSamples/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/4o4n4b56/obj/arm64-v8a/libswappywrapper.so	a8b24b41eb1e905c
+48	1614	7817018035126198	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	684e114dee91c623
+72	1625	7817018035187920	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	e575cf18e12d5cc7
+13	1663	7817018035647027	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	3e443bbe34064473
+87	1699	7817018036090017	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	492f848121ccb666
+1	1770	7817018036649068	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	f4e11f0b47c3f4d1
+59	1969	7817018038740014	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	dd0cdc92a9c15f3e
+105	2014	7817018039337340	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	db7c221eb1160a1
+27	2062	7817018039753781	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	dbea0665da007d4e
+2062	2176	7817018040976504	C:/Users/noren/OneDrive/Dokument/LTH/AR/AR project/Unity-PassthroughCameraApiSamples/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/4o4n4b56/obj/arm64-v8a/libgame.so	4e48f8003c141847

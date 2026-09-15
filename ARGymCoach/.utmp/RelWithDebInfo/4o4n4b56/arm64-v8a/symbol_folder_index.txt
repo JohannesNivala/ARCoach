@@ -1,0 +1,1 @@
+C:\Users\noren\OneDrive\Dokument\LTH\AR\AR project\Unity-PassthroughCameraApiSamples\Library\Bee\Android\Prj\IL2CPP\Gradle\unityLibrary\build\intermediates\cxx\RelWithDebInfo\4o4n4b56\obj\arm64-v8a
